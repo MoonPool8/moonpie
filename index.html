@@ -5,19 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>moon pie</title>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
       font-family: Arial, sans-serif;
       background: #111;
       color: #eee;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
       padding: 5vw;
-      margin: 0;
-      font-size: 4vw; /* scales with screen width */
+      box-sizing: border-box;
+      font-size: 4vw; /* responsive font */
     }
 
     h1 {
       color: #f5c518;
       font-size: 6vw;
       margin-bottom: 4vw;
+    }
+
+    .moon-data {
+      width: 100%;
+      max-width: 600px;
     }
 
     .moon-data p {
@@ -42,77 +59,77 @@
   </style>
 </head>
 <body>
-<h1>Live Moon Data</h1>
-<div class="moon-data">
-  <p><strong>Phase:</strong> <span id="phase">Loading...</span></p>
-  <p><strong>Illumination:</strong> <span id="illumination">Loading...</span></p>
-  <p><strong>Moonrise:</strong> <span id="moonrise">Loading...</span></p>
-  <p><strong>Moonset:</strong> <span id="moonset">Loading...</span></p>
-  <p><strong>Moon Altitude:</strong> <span id="altitude">Loading...</span></p>
-  <p><strong>Moon Azimuth:</strong> <span id="azimuth">Loading...</span></p>
-</div>
+  <h1>Live Moon Data</h1>
+  <div class="moon-data">
+    <p><strong>Phase:</strong> <span id="phase">Loading...</span></p>
+    <p><strong>Illumination:</strong> <span id="illumination">Loading...</span></p>
+    <p><strong>Moonrise:</strong> <span id="moonrise">Loading...</span></p>
+    <p><strong>Moonset:</strong> <span id="moonset">Loading...</span></p>
+    <p><strong>Moon Altitude:</strong> <span id="altitude">Loading...</span></p>
+    <p><strong>Moon Azimuth:</strong> <span id="azimuth">Loading...</span></p>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-<script>
-  const lat = 33.9566;
-  const lon = -83.9873;
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+  <script>
+    const lat = 33.9566;
+    const lon = -83.9873;
 
-  function formatTime(date) {
-    if (!date || isNaN(date.getTime())) return "Unavailable";
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    minutes = minutes.toString().padStart(2, '0');
-    return `${hours}:${minutes} ${ampm}`;
-  }
+    function formatTime(date) {
+      if (!date || isNaN(date.getTime())) return "Unavailable";
+      let hours = date.getHours();
+      let minutes = date.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      minutes = minutes.toString().padStart(2, '0');
+      return `${hours}:${minutes} ${ampm}`;
+    }
 
-  function getMoonPhaseName(phase) {
-    if (phase === 0) return "New Moon";
-    if (phase > 0 && phase < 0.25) return "Waxing Crescent";
-    if (phase === 0.25) return "First Quarter";
-    if (phase > 0.25 && phase < 0.5) return "Waxing Gibbous";
-    if (phase === 0.5) return "Full Moon";
-    if (phase > 0.5 && phase < 0.75) return "Waning Gibbous";
-    if (phase === 0.75) return "Last Quarter";
-    if (phase > 0.75 && phase < 1) return "Waning Crescent";
-    return "New Moon";
-  }
+    function getMoonPhaseName(phase) {
+      if (phase === 0) return "New Moon";
+      if (phase > 0 && phase < 0.25) return "Waxing Crescent";
+      if (phase === 0.25) return "First Quarter";
+      if (phase > 0.25 && phase < 0.5) return "Waxing Gibbous";
+      if (phase === 0.5) return "Full Moon";
+      if (phase > 0.5 && phase < 0.75) return "Waning Gibbous";
+      if (phase === 0.75) return "Last Quarter";
+      if (phase > 0.75 && phase < 1) return "Waning Crescent";
+      return "New Moon";
+    }
 
-  function getDirectionFromAzimuth(deg) {
-    const directions = [
-      "North", "Northeast", "East", "Southeast",
-      "South", "Southwest", "West", "Northwest"
-    ];
-    const index = Math.round(deg / 45) % 8;
-    return directions[index];
-  }
+    function getDirectionFromAzimuth(deg) {
+      const directions = [
+        "North", "Northeast", "East", "Southeast",
+        "South", "Southwest", "West", "Northwest"
+      ];
+      const index = Math.round(deg / 45) % 8;
+      return directions[index];
+    }
 
-  function updateMoonData() {
-    const now = new Date();
+    function updateMoonData() {
+      const now = new Date();
 
-    const moonIllum = SunCalc.getMoonIllumination(now);
-    const phaseName = getMoonPhaseName(moonIllum.phase);
+      const moonIllum = SunCalc.getMoonIllumination(now);
+      const phaseName = getMoonPhaseName(moonIllum.phase);
 
-    document.getElementById('phase').textContent = phaseName;
-    document.getElementById('illumination').textContent = `${(moonIllum.fraction * 100).toFixed(1)}%`;
+      document.getElementById('phase').textContent = phaseName;
+      document.getElementById('illumination').textContent = `${(moonIllum.fraction * 100).toFixed(1)}%`;
 
-    const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
+      const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
 
-    document.getElementById('moonrise').textContent = formatTime(moonTimes.rise);
-    document.getElementById('moonset').textContent = formatTime(moonTimes.set);
+      document.getElementById('moonrise').textContent = formatTime(moonTimes.rise);
+      document.getElementById('moonset').textContent = formatTime(moonTimes.set);
 
-    const moonPos = SunCalc.getMoonPosition(now, lat, lon);
-    const altitudeDeg = (moonPos.altitude * 180 / Math.PI).toFixed(1);
-    const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
-    const direction = getDirectionFromAzimuth(azimuthDeg);
+      const moonPos = SunCalc.getMoonPosition(now, lat, lon);
+      const altitudeDeg = (moonPos.altitude * 180 / Math.PI).toFixed(1);
+      const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
+      const direction = getDirectionFromAzimuth(azimuthDeg);
 
-    document.getElementById('altitude').textContent = `${altitudeDeg}°`;
-    document.getElementById('azimuth').textContent = `${azimuthDeg.toFixed(1)}° (${direction})`;
-  }
+      document.getElementById('altitude').textContent = `${altitudeDeg}°`;
+      document.getElementById('azimuth').textContent = `${azimuthDeg.toFixed(1)}° (${direction})`;
+    }
 
-  updateMoonData();
-  setInterval(updateMoonData, 5000); // update every 5 seconds
-</script>
+    updateMoonData();
+    setInterval(updateMoonData, 5000);
+  </script>
 </body>
 </html>
