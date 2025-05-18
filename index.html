@@ -31,8 +31,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 <script>
-  console.log('SunCalc loaded:', SunCalc);
-
   const lat = 33.9566;
   const lon = -83.9873;
 
@@ -58,13 +56,11 @@
     return "New Moon";
   }
 
-  function getDirectionFromAzimuth(azimuth) {
+  function getDirectionFromAzimuth(deg) {
     const directions = [
       "North", "Northeast", "East", "Southeast",
       "South", "Southwest", "West", "Northwest"
     ];
-    // azimuth in radians, convert to degrees
-    const deg = (azimuth * 180 / Math.PI + 360) % 360;
     const index = Math.round(deg / 45) % 8;
     return directions[index];
   }
@@ -85,22 +81,27 @@
 
     const moonPos = SunCalc.getMoonPosition(now, lat, lon);
     const altitudeDeg = (moonPos.altitude * 180 / Math.PI).toFixed(1);
-    const azimuthDeg = ((moonPos.azimuth * 180 / Math.PI) + 180).toFixed(1);
+
+    const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
+    const direction = getDirectionFromAzimuth(azimuthDeg);
 
     document.getElementById('altitude').textContent = `${altitudeDeg}°`;
-    document.getElementById('azimuth').textContent = `${azimuthDeg}° (${getDirectionFromAzimuth(moonPos.azimuth)})`;
+    document.getElementById('azimuth').textContent = `${azimuthDeg.toFixed(1)}° (${direction})`;
 
     console.log('Moon Data Updated:', {
-      phaseName, illumination: moonIllum.fraction,
+      phaseName,
+      illumination: moonIllum.fraction,
       moonrise: moonTimes.rise,
       moonset: moonTimes.set,
       altitude: altitudeDeg,
       azimuth: azimuthDeg,
+      direction
     });
   }
 
   updateMoonData();
-  setInterval(updateMoonData, 5000); // update every minute
+  setInterval(updateMoonData, 5000); // update every 5 seconds
 </script>
 </body>
 </html>
+
