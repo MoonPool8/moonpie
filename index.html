@@ -11,8 +11,9 @@
       height: 100%;
       width: 100%;
       font-family: Arial, sans-serif;
-      background: #111;
+      background-color: #111;
       color: #eee;
+      box-sizing: border-box;
     }
 
     body {
@@ -20,41 +21,28 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
+      min-height: 100vh;
       padding: 5vw;
-      box-sizing: border-box;
-      font-size: 4vw; /* responsive font */
+      text-align: center;
     }
 
     h1 {
       color: #f5c518;
-      font-size: 6vw;
-      margin-bottom: 4vw;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin-bottom: 2rem;
     }
 
     .moon-data {
-      width: 100%;
-      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      max-width: 90vw;
     }
 
     .moon-data p {
-      margin: 2vw 0;
+      margin: 0;
       line-height: 1.4;
-    }
-
-    @media (min-width: 600px) {
-      body {
-        font-size: 1.2rem;
-        padding: 20px;
-      }
-
-      h1 {
-        font-size: 2rem;
-      }
-
-      .moon-data p {
-        font-size: 1rem;
-      }
     }
   </style>
 </head>
@@ -97,17 +85,13 @@
     }
 
     function getDirectionFromAzimuth(deg) {
-      const directions = [
-        "North", "Northeast", "East", "Southeast",
-        "South", "Southwest", "West", "Northwest"
-      ];
+      const directions = ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"];
       const index = Math.round(deg / 45) % 8;
       return directions[index];
     }
 
     function updateMoonData() {
       const now = new Date();
-
       const moonIllum = SunCalc.getMoonIllumination(now);
       const phaseName = getMoonPhaseName(moonIllum.phase);
 
@@ -115,7 +99,6 @@
       document.getElementById('illumination').textContent = `${(moonIllum.fraction * 100).toFixed(1)}%`;
 
       const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
-
       document.getElementById('moonrise').textContent = formatTime(moonTimes.rise);
       document.getElementById('moonset').textContent = formatTime(moonTimes.set);
 
