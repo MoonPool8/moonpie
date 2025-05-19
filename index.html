@@ -54,45 +54,14 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background-color: #ddd;
+            background-color: transparent;
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-        }
-
-        /* New phase icons: sharper, more opaque, less gradient */
-        .new-moon {
-            background-color: #000;
-            box-shadow: none;
-        }
-
-        .waxing-crescent {
-            background: linear-gradient(to right, #000 75%, #ddd 25%);
-        }
-
-        .first-quarter {
-            background: linear-gradient(to right, #000 50%, #ddd 50%);
-        }
-
-        .waxing-gibbous {
-            background: linear-gradient(to right, #000 25%, #ddd 75%);
-        }
-
-        .full-moon {
-            background-color: #ddd;
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-        }
-
-        .waning-gibbous {
-            background: linear-gradient(to right, #ddd 75%, #000 25%);
-        }
-
-        .last-quarter {
-            background: linear-gradient(to right, #ddd 50%, #000 50%);
-        }
-
-        .waning-crescent {
-            background: linear-gradient(to right, #ddd 25%, #000 75%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
     </style>
 </head>
@@ -138,35 +107,31 @@
             return "New Moon";
         }
 
-        function updateMoonIcon(phase) {
+        // This function draws an SVG crescent dynamically according to illumination and phase,
+        // but with the "shadow" light and the "light" dark (inverted colors).
+        function updateMoonIconByIllumination(illumFrac, phase) {
             const iconSpan = document.getElementById("phase-icon");
-            iconSpan.className = "moon-icon";
             let favicon = document.getElementById('favicon');
-            let phaseColor = '#ddd';
+            const size = 100;
+            const r = 45;
 
-            if (phase < 0.01) {
-                iconSpan.classList.add("new-moon");
-                phaseColor = '#000';
-            } else if (phase < 0.25) {
-                iconSpan.classList.add("waxing-crescent");
-            } else if (phase === 0.25) {
-                iconSpan.classList.add("first-quarter");
-            } else if (phase < 0.5) {
-                iconSpan.classList.add("waxing-gibbous");
-            } else if (phase === 0.5) {
-                iconSpan.classList.add("full-moon");
-            } else if (phase < 0.75) {
-                iconSpan.classList.add("waning-gibbous");
-            } else if (phase === 0.75) {
-                iconSpan.classList.add("last-quarter");
-            } else if (phase < 1) {
-                iconSpan.classList.add("waning-crescent");
-            }
+            // Determine waxing or waning for correct crescent direction
+            let isWaxing = phase <= 0.5;
+            let offset = (1 - illumFrac) * r * 2;
+            if (!isWaxing) offset = -offset;
 
-            // Update the favicon color
-            const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>#lunar-phase{fill:${phaseColor};}</style><circle id="lunar-phase" cx="50" cy="50" r="45"/></svg>`;
+            // Invert the colors: "shadow" is light, "moon" is dark
+            const svgContent = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
+                    <circle cx="50" cy="50" r="${r}" fill="#111"/>
+                    <ellipse cx="${50 + offset / 2}" cy="50" rx="${r}" ry="${r+15}" fill="#ddd"/>
+                </svg>
+            `;
+            // Set favicon
             const dataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
             favicon.href = dataUri;
+            // Set in-page icon
+            iconSpan.innerHTML = svgContent;
         }
 
         function getDirectionFromAzimuth(deg) {
@@ -212,7 +177,8 @@
             document.getElementById("illumination").textContent =
                 `${(moonIllum.fraction * 100).toFixed(1)}%`;
 
-            updateMoonIcon(moonIllum.phase);
+            // Use illumination for icon, and phase for correct direction
+            updateMoonIconByIllumination(moonIllum.fraction, moonIllum.phase);
 
             const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
             document.getElementById("moonrise").textContent = formatTime(
