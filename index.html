@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>moon pie</title>
-    <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E%23lunar-phase%7Bfill:%23ddd;%7D%3C/style%3E%3Ccircle id='lunar-phase' cx='50' cy='50' r='45'/%3E%3C/svg%3E" />
+    <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E%23lunar-phase%7Bfill:%23ddd;%7D%3C/style%3E%3Ccircle id='lunar-phase' cx='50' cy='50' r='45'/%3E%3C/svg%3E">
     <style>
         html,
         body {
@@ -60,14 +60,14 @@
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
 
-        /* Styles for different phases */
+        /* New phase icons: sharper, more opaque, less gradient */
         .new-moon {
             background-color: #000;
             box-shadow: none;
         }
 
         .waxing-crescent {
-            background: linear-gradient(to right, #000 55%, #ddd 45%);
+            background: linear-gradient(to right, #000 75%, #ddd 25%);
         }
 
         .first-quarter {
@@ -84,7 +84,7 @@
         }
 
         .waning-gibbous {
-            background: linear-gradient(to right, #ddd 25%, #000 75%);
+            background: linear-gradient(to right, #ddd 75%, #000 25%);
         }
 
         .last-quarter {
@@ -92,7 +92,7 @@
         }
 
         .waning-crescent {
-            background: linear-gradient(to right, #ddd 55%, #000 45%);
+            background: linear-gradient(to right, #ddd 25%, #000 75%);
         }
     </style>
 </head>
@@ -224,7 +224,6 @@
             const transit = getMoonTransitTime(now, lat, lon);
             document.getElementById("transit").textContent = formatTime(transit);
 
-
             const moonPos = SunCalc.getMoonPosition(now, lat, lon);
             const altitudeDeg = ((moonPos.altitude * 180) / Math.PI).toFixed(1);
             const azimuthDeg = ((moonPos.azimuth * 180) / Math.PI + 180) % 360;
@@ -233,8 +232,6 @@
             document.getElementById("altitude").textContent = `${altitudeDeg}°`;
             document.getElementById("azimuth").textContent =
                 `${azimuthDeg.toFixed(1)}° (${direction})`;
-
-
         }
 
         updateMoonData();
