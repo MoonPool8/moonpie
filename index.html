@@ -1,207 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>moon pie</title>
-    <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E%23lunar-phase%7Bfill:%23ddd;%7D%3C/style%3E%3Ccircle id='lunar-phase' cx='50' cy='50' r='45'/%3E%3C/svg%3E">
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            font-family: Arial, sans-serif;
-            background-color: #111;
-            color: #eee;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>moon pie</title>
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E%23lunar-phase%7Bfill:%23ddd;%7D%3C/style%3E%3Ccircle id='lunar-phase' cx='50' cy='50' r='45'/%3E%3C/svg%3E">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #eee;
+      box-sizing: border-box;
+    }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 5vw;
-            text-align: center;
-        }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 5vw;
+      text-align: center;
+    }
 
-        h1 {
-            color: #f5c518;
-            font-size: clamp(2rem, 6vw, 3.5rem);
-            margin-bottom: 2rem;
-        }
+    h1 {
+      color: #f5c518;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin-bottom: 1rem;
+    }
 
-        .moon-data {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            max-width: 90vw;
-        }
+    form {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
 
-        .moon-data p {
-            margin: 0;
-            line-height: 1.4;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    input {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: none;
+      width: 120px;
+    }
 
-        .moon-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background-color: transparent;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-    </style>
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #f5c518;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .moon-data {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      max-width: 90vw;
+    }
+
+    .moon-data p {
+      margin: 0;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .moon-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: transparent;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .coords-display {
+      font-size: 1rem;
+      margin-top: 1rem;
+      color: #ccc;
+    }
+  </style>
 </head>
 <body>
-    <h1>Live Moon Data</h1>
-    <div class="moon-data">
-        <p><strong>Phase:</strong> <span id="phase">Loading...</span><span id="phase-icon" class="moon-icon"></span></p>
-        <p>
-            <strong>Illumination:</strong> <span id="illumination">Loading...</span>
-        </p>
-        <p><strong>Moonrise:</strong> <span id="moonrise">Loading...</span></p>
-        <p><strong>Meridian Transit:</strong> <span id="transit">Loading...</span></p>
-        <p><strong>Moonset:</strong> <span id="moonset">Loading...</span></p>
-        <p>
-            <strong>Moon Altitude:</strong> <span id="altitude">Loading...</span>
-        </p>
-        <p><strong>Moon Azimuth:</strong> <span id="azimuth">Loading...</span></p>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-    <script>
-        const lat = 33.9566;
-        const lon = -83.9873;
+  <h1>Live Moon Data</h1>
 
-        function formatTime(date) {
-            if (!date || isNaN(date.getTime())) return "Unavailable";
-            let hours = date.getHours();
-            let minutes = date.getMinutes();
-            const ampm = hours >= 12 ? "PM" : "AM";
-            hours = hours % 12 || 12;
-            minutes = minutes.toString().padStart(2, "0");
-            return `${hours}:${minutes} ${ampm}`;
+  <form id="location-form">
+    <input type="number" step="any" id="input-lat" required value="33.9566" placeholder="Latitude" />
+    <input type="number" step="any" id="input-lon" required value="-83.9873" placeholder="Longitude" />
+    <button type="submit">Update Location</button>
+  </form>
+
+  <div class="moon-data">
+    <p><strong>Phase:</strong> <span id="phase">Loading...</span><span id="phase-icon" class="moon-icon"></span></p>
+    <p><strong>Illumination:</strong> <span id="illumination">Loading...</span></p>
+    <p><strong>Moonrise:</strong> <span id="moonrise">Loading...</span></p>
+    <p><strong>Meridian Transit:</strong> <span id="transit">Loading...</span></p>
+    <p><strong>Moonset:</strong> <span id="moonset">Loading...</span></p>
+    <p><strong>Moon Altitude:</strong> <span id="altitude">Loading...</span></p>
+    <p><strong>Moon Azimuth:</strong> <span id="azimuth">Loading...</span></p>
+  </div>
+
+  <div class="coords-display" id="coord-info">
+    <label>
+      <input type="checkbox" id="toggle-coords" checked /> Show Coordinates
+    </label>
+    <div id="coords-text">Lat: 33.9566, Lon: -83.9873</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+  <script>
+    let lat = 0;
+    let lon = 0;
+
+    function formatTime(date) {
+      if (!date || isNaN(date.getTime())) return "Unavailable";
+      let hours = date.getHours();
+      let minutes = date.getMinutes();
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      minutes = minutes.toString().padStart(2, "0");
+      return `${hours}:${minutes} ${ampm}`;
+    }
+
+    function getMoonPhaseName(phase) {
+      if (phase === 0) return "New Moon";
+      if (phase > 0 && phase < 0.25) return "Waxing Crescent";
+      if (phase === 0.25) return "First Quarter";
+      if (phase > 0.25 && phase < 0.5) return "Waxing Gibbous";
+      if (phase === 0.5) return "Full Moon";
+      if (phase > 0.5 && phase < 0.75) return "Waning Gibbous";
+      if (phase === 0.75) return "Last Quarter";
+      if (phase > 0.75 && phase < 1) return "Waning Crescent";
+      return "New Moon";
+    }
+
+    function updateMoonIconByIllumination(illumFrac, phase) {
+      const iconSpan = document.getElementById("phase-icon");
+      let favicon = document.getElementById('favicon');
+      const size = 100;
+      const r = 45;
+      let isWaxing = phase <= 0.5;
+      let offset = (1 - illumFrac) * r * 2;
+      if (!isWaxing) offset = -offset;
+      const svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
+          <circle cx="50" cy="50" r="${r}" fill="#111"/>
+          <ellipse cx="${50 + offset / 2}" cy="50" rx="${r}" ry="${r+15}" fill="#ddd"/>
+        </svg>
+      `;
+      const dataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
+      favicon.href = dataUri;
+      iconSpan.innerHTML = svgContent;
+    }
+
+    function getDirectionFromAzimuth(deg) {
+      const directions = ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"];
+      const index = Math.round(deg / 45) % 8;
+      return directions[index];
+    }
+
+    function getMoonTransitTime(date, lat, lon) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      let maxAltitude = -Infinity;
+      let transitTime = start;
+      for (let i = 0; i < 24 * 60; i++) {
+        const testTime = new Date(start.getTime() + i * 60000);
+        const pos = SunCalc.getMoonPosition(testTime, lat, lon);
+        const altitude = pos.altitude;
+        if (altitude > maxAltitude) {
+          maxAltitude = altitude;
+          transitTime = testTime;
         }
+      }
+      return transitTime;
+    }
 
-        function getMoonPhaseName(phase) {
-            if (phase === 0) return "New Moon";
-            if (phase > 0 && phase < 0.25) return "Waxing Crescent";
-            if (phase === 0.25) return "First Quarter";
-            if (phase > 0.25 && phase < 0.5) return "Waxing Gibbous";
-            if (phase === 0.5) return "Full Moon";
-            if (phase > 0.5 && phase < 0.75) return "Waning Gibbous";
-            if (phase === 0.75) return "Last Quarter";
-            if (phase > 0.75 && phase < 1) return "Waning Crescent";
-            return "New Moon";
-        }
+    function updateMoonData() {
+      const now = new Date();
+      const moonIllum = SunCalc.getMoonIllumination(now);
+      const phaseName = getMoonPhaseName(moonIllum.phase);
+      document.getElementById("phase").textContent = phaseName;
+      document.getElementById("illumination").textContent = `${(moonIllum.fraction * 100).toFixed(1)}%`;
+      updateMoonIconByIllumination(moonIllum.fraction, moonIllum.phase);
+      const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
+      document.getElementById("moonrise").textContent = formatTime(moonTimes.rise);
+      document.getElementById("moonset").textContent = formatTime(moonTimes.set);
+      const transit = getMoonTransitTime(now, lat, lon);
+      document.getElementById("transit").textContent = formatTime(transit);
+      const moonPos = SunCalc.getMoonPosition(now, lat, lon);
+      const altitudeDeg = ((moonPos.altitude * 180) / Math.PI).toFixed(1);
+      const azimuthDeg = ((moonPos.azimuth * 180) / Math.PI + 180) % 360;
+      const direction = getDirectionFromAzimuth(azimuthDeg);
+      document.getElementById("altitude").textContent = `${altitudeDeg}°`;
+      document.getElementById("azimuth").textContent = `${azimuthDeg.toFixed(1)}° (${direction})`;
+      document.getElementById("coords-text").textContent = `Lat: ${lat}, Lon: ${lon}`;
+    }
 
-        // This function draws an SVG crescent dynamically according to illumination and phase,
-        // but with the "shadow" light and the "light" dark (inverted colors).
-        function updateMoonIconByIllumination(illumFrac, phase) {
-            const iconSpan = document.getElementById("phase-icon");
-            let favicon = document.getElementById('favicon');
-            const size = 100;
-            const r = 45;
-
-            // Determine waxing or waning for correct crescent direction
-            let isWaxing = phase <= 0.5;
-            let offset = (1 - illumFrac) * r * 2;
-            if (!isWaxing) offset = -offset;
-
-            // Invert the colors: "shadow" is light, "moon" is dark
-            const svgContent = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
-                    <circle cx="50" cy="50" r="${r}" fill="#111"/>
-                    <ellipse cx="${50 + offset / 2}" cy="50" rx="${r}" ry="${r+15}" fill="#ddd"/>
-                </svg>
-            `;
-            // Set favicon
-            const dataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-            favicon.href = dataUri;
-            // Set in-page icon
-            iconSpan.innerHTML = svgContent;
-        }
-
-        function getDirectionFromAzimuth(deg) {
-            const directions = [
-                "North",
-                "Northeast",
-                "East",
-                "Southeast",
-                "South",
-                "Southwest",
-                "West",
-                "Northwest",
-            ];
-            const index = Math.round(deg / 45) % 8;
-            return directions[index];
-        }
-
-        // Estimate the moon transit time by checking max altitude over the day
-        function getMoonTransitTime(date, lat, lon) {
-            const start = new Date(date);
-            start.setHours(0, 0, 0, 0);
-            let maxAltitude = -Infinity;
-            let transitTime = start;
-
-            for (let i = 0; i < 24 * 60; i++) {
-                const testTime = new Date(start.getTime() + i * 60000); // each minute
-                const pos = SunCalc.getMoonPosition(testTime, lat, lon);
-                const altitude = pos.altitude;
-                if (altitude > maxAltitude) {
-                    maxAltitude = altitude;
-                    transitTime = testTime;
-                }
-            }
-            return transitTime;
-        }
-
-        function updateMoonData() {
-            const now = new Date();
-            const moonIllum = SunCalc.getMoonIllumination(now);
-            const phaseName = getMoonPhaseName(moonIllum.phase);
-
-            document.getElementById("phase").textContent = phaseName;
-            document.getElementById("illumination").textContent =
-                `${(moonIllum.fraction * 100).toFixed(1)}%`;
-
-            // Use illumination for icon, and phase for correct direction
-            updateMoonIconByIllumination(moonIllum.fraction, moonIllum.phase);
-
-            const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
-            document.getElementById("moonrise").textContent = formatTime(
-                moonTimes.rise
-            );
-            document.getElementById("moonset").textContent = formatTime(
-                moonTimes.set
-            );
-            const transit = getMoonTransitTime(now, lat, lon);
-            document.getElementById("transit").textContent = formatTime(transit);
-
-            const moonPos = SunCalc.getMoonPosition(now, lat, lon);
-            const altitudeDeg = ((moonPos.altitude * 180) / Math.PI).toFixed(1);
-            const azimuthDeg = ((moonPos.azimuth * 180) / Math.PI + 180) % 360;
-            const direction = getDirectionFromAzimuth(azimuthDeg);
-
-            document.getElementById("altitude").textContent = `${altitudeDeg}°`;
-            document.getElementById("azimuth").textContent =
-                `${azimuthDeg.toFixed(1)}° (${direction})`;
-        }
-
+    document.getElementById("location-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const newLat = parseFloat(document.getElementById("input-lat").value);
+      const newLon = parseFloat(document.getElementById("input-lon").value);
+      if (!isNaN(newLat) && !isNaN(newLon)) {
+        lat = newLat;
+        lon = newLon;
         updateMoonData();
-        setInterval(updateMoonData, 5000);
-    </script>
+      }
+    });
+
+    document.getElementById("toggle-coords").addEventListener("change", function(e) {
+      document.getElementById("coords-text").style.display = e.target.checked ? "block" : "none";
+    });
+
+    updateMoonData();
+    setInterval(() => updateMoonData(), 5000);
+  </script>
 </body>
 </html>
