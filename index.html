@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>moon pie</title>
-  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E%23lunar-phase%7Bfill:%23ddd;%7D%3C/style%3E%3Ccircle id='lunar-phase' cx='50' cy='50' r='45'/%3E%3C/svg%3E">
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='65'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E" />
   <style>
     html, body {
       margin: 0;
@@ -74,17 +74,18 @@
     }
 
     .moon-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background-color: transparent;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 28px;
+      background: transparent;
+      border-radius: 50%;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
       padding: 0;
+      overflow: hidden;
+      /* Remove svg-specific styles */
     }
 
     .coords-display {
@@ -125,6 +126,19 @@
     let lat = 0;
     let lon = 0;
 
+    // Map phases to moon emoji. Use "🌑" (new), "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"
+    function getMoonEmoji(phase) {
+      if (phase === 0) return "🌑";
+      if (phase > 0 && phase < 0.25) return "🌒";
+      if (phase === 0.25) return "🌓";
+      if (phase > 0.25 && phase < 0.5) return "🌔";
+      if (phase === 0.5) return "🌕";
+      if (phase > 0.5 && phase < 0.75) return "🌖";
+      if (phase === 0.75) return "🌗";
+      if (phase > 0.75 && phase < 1) return "🌘";
+      return "🌑";
+    }
+
     function formatTime(date) {
       if (!date || isNaN(date.getTime())) return "Unavailable";
       let hours = date.getHours();
@@ -147,23 +161,16 @@
       return "New Moon";
     }
 
-    function updateMoonIconByIllumination(illumFrac, phase) {
+    // Replace moon icon and favicon with emoji version
+    function updateMoonIconAndFavicon(phase) {
       const iconSpan = document.getElementById("phase-icon");
+      const emoji = getMoonEmoji(phase);
+      iconSpan.textContent = emoji;
+
+      // Set favicon using SVG with emoji text
       let favicon = document.getElementById('favicon');
-      const size = 100;
-      const r = 45;
-      let isWaxing = phase <= 0.5;
-      let offset = (1 - illumFrac) * r * 2;
-      if (!isWaxing) offset = -offset;
-      const svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
-          <circle cx="50" cy="50" r="${r}" fill="#111"/>
-          <ellipse cx="${50 + offset / 2}" cy="50" rx="${r}" ry="${r+15}" fill="#ddd"/>
-        </svg>
-      `;
-      const dataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-      favicon.href = dataUri;
-      iconSpan.innerHTML = svgContent;
+      const svgEmoji = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='60' text-anchor='middle' font-size='65'>${emoji}</text></svg>`;
+      favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svgEmoji);
     }
 
     function getDirectionFromAzimuth(deg) {
@@ -195,7 +202,7 @@
       const phaseName = getMoonPhaseName(moonIllum.phase);
       document.getElementById("phase").textContent = phaseName;
       document.getElementById("illumination").textContent = `${(moonIllum.fraction * 100).toFixed(1)}%`;
-      updateMoonIconByIllumination(moonIllum.fraction, moonIllum.phase);
+      updateMoonIconAndFavicon(moonIllum.phase);
       const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
       document.getElementById("moonrise").textContent = formatTime(moonTimes.rise);
       document.getElementById("moonset").textContent = formatTime(moonTimes.set);
